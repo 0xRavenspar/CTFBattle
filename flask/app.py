@@ -43,7 +43,7 @@ def create_user():
     response = requests.post(url, headers=headers, json=payload)
 
     if response.status_code == 200:
-        return jsonify(response.json()), 200
+        return password
     else:
         return jsonify({"error": response.json()}), response.status_code
 

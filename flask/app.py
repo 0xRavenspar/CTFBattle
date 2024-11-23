@@ -47,6 +47,48 @@ def create_user():
     else:
         return jsonify({"error": response.json()}), response.status_code
 
+@app.route('/user_score', methods=['POST'])
+def user_score():
+    user_data = request.json
+
+    name = user_data["name"]
+
+    url = f"{base_url}/scoreboard"
+
+    response = requests.get(url, headers=headers)
+    response = response.json()["data"]
+
+    user_info = next((entry for entry in response if entry["name"] == name), None)
+    
+    if user_info:
+        return {"position": user_info["pos"], "score": user_info["score"]}
+    return {"error": "User not found"}
+
+@app.route('/room_info', methods=['GET'])
+def room_info():
+    url = f"{base_url}/statistics/users"
+
+    response = requests.get(url, headers=headers)
+    response = response.json()["data"]
+
+    no_of_users = int(response["registered"])-1
+
+    url = f"{base_url}/challenges"
+
+    response = requests.get(url, headers=headers)
+    response = response.json()["data"]
+    
+    no_of_challenges = len(response)
+
+    url = f"{base_url}/scoreboard"
+
+    response = requests.get(url, headers=headers)
+    response = response.json()["data"]
+
+    highest_score = response[0]["score"]
+
+    return {"no_of_users": no_of_users, "no_of_challenges": no_of_challenges, "highest_score": highest_score}
+
 
 if __name__ == '__main__':
     app.run(debug=True)

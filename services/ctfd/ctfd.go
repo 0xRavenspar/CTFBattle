@@ -40,7 +40,7 @@ func CreateCTFdContainer(containerPrefix string) (string, error) {
 		"-p", fmt.Sprintf("%d:8000", port),
 		"-e", fmt.Sprintf("CTFd_DATABASE_URL=sqlite:///%s.db", containerName),
 		"--restart", "always",
-		"ravenspar/ctfbattle:latest",
+		"ravenspar/ctf_chall:latest",
 	)
 
 	// Run the docker command

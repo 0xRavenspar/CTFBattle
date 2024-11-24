@@ -3,7 +3,10 @@ package rooms
 import (
 	"CTFBattle/db"
 	"CTFBattle/services/ctfd"
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -21,53 +24,59 @@ type Room struct {
 	ExpirationAt time.Time `json:"expiration_at"`
 }
 
-// type GenerateChallengesRequest struct {
-// 	Level   string    `json:"level"`
-// 	CtfdURL string `json:"ctfdurl"`
-// }
+type GenerateChallengesRequest struct {
+	Level   string    `json:"level"`
+	CtfdURL string `json:"ctfdurl"`
+}
 
 
-// func GenerateChallenges(roomID string, level string, ctfdurl string) error {
-// 	// Prepare the data to send to the challenge generation API
-// 	requestData := GenerateChallengesRequest{
-// 		Level:   level,
-// 		CtfdURL: ctfdurl,
-// 	}
+func GenerateChallenges(roomID string, level string, ctfdurl string) error {
+	// Prepare the data to send to the challenge generation API
+	requestData := GenerateChallengesRequest{
+		Level:   level,
+		CtfdURL: ctfdurl,
+	}
 
-// 	jsonData, err := json.Marshal(requestData)
-//     if err != nil {
-//         return fmt.Errorf("failed to marshal request body: %w", err)
-//     }
+	jsonData, err := json.Marshal(requestData)
+    if err != nil {
+        return fmt.Errorf("failed to marshal request body: %w", err)
+    }
 
-//     // Create HTTP client with timeout
-//     client := &http.Client{
-//         Timeout: 3000000000 * time.Second,
-//     }
+    
+    // Create a new HTTP request
+    req, err := http.NewRequest("POST", "http://localhost:5000/create_challenges", bytes.NewBuffer(jsonData))
+    if err != nil {
+        return fmt.Errorf("failed to create HTTP request: %w", err)
+    }
 
-//     // Make the POST request
-//     resp, err := client.Post(
-//         "http://localhost:5000/create_challenges",
-//         "application/json",
-//         bytes.NewBuffer(jsonData),
-//     )
-//     if err != nil {
-//         return fmt.Errorf("failed to call create_challenges API: %w", err)
-//     }
-//     defer resp.Body.Close()
+    // Set the necessary headers
+    req.Header.Set("Accept", "*/*")
+    req.Header.Set("Content-Type", "application/json")
 
-//     // Read the response body
-//     body, err := io.ReadAll(resp.Body)
-//     if err != nil {
-//         return fmt.Errorf("failed to read response body: %w", err)
-//     }
+    // Create an HTTP client with a timeout
+    client := &http.Client{}
 
-//     // Check status code first
-//     if resp.StatusCode != http.StatusOK {
-//         return fmt.Errorf("non-200 response from create_challenges API: %s", body)
-//     }
+    // Send the request
+    resp, err := client.Do(req)
+    if err != nil {
+        return fmt.Errorf("failed to send request: %w", err)
+    }
+	
+    defer resp.Body.Close()
 
-//     return nil
-// }
+    // Read the response body
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return fmt.Errorf("failed to read response body: %w", err)
+    }
+
+    // Check status code first
+    if resp.StatusCode != http.StatusOK {
+        return fmt.Errorf("non-200 response from create_challenges API: %s", body)
+    }
+
+    return nil
+}
 
 
 // CreateRoom adds a new room to the database

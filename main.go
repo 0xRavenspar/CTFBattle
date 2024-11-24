@@ -5,6 +5,7 @@ import (
 	// "CTFBattle/middleware"
 	// "CTFBattle/services/auth"
 	"CTFBattle/services/rooms"
+	"CTFBattle/services/user_rooms"
 	"CTFBattle/services/users"
 
 	"gofr.dev/pkg/gofr"
@@ -29,6 +30,10 @@ func main() {
 	app.POST("/rooms/create", rooms.CreateRoomHandler)
 	app.GET("/rooms/{id}", rooms.GetRoomDetailsHandler)
 	// app.POST("/ctfd/create",ctfd.CreateCTFdInstance)
+
+	app.POST("/rooms/join/{roomid}", user_rooms.JoinRoomHandler)
+	app.GET("/rooms/user-stats/{userid}/{roomid}", user_rooms.GetUserStatsHandler)
+	app.GET("/rooms/stats/{roomid}", user_rooms.GetRoomStatsHandler)
 
 	app.Run()
 }

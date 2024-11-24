@@ -3,9 +3,7 @@ package ctfd
 import (
 	"fmt"
 	"net"
-	"os"
 	"os/exec"
-	"strconv"
 )
 
 // getUnusedPort finds an available port in the given range
@@ -22,13 +20,13 @@ func getUnusedPort(start, end int) (int, error) {
 }
 
 // createCTFdContainer creates a new CTFd container on an unused port
-func createCTFdContainer(containerPrefix string) error {
+func CreateCTFdContainer(containerPrefix string) (string, error) {
 	// Find an unused port
 	startport := 10000
 	endport := 65500
 	port, err := getUnusedPort(startport, endport)
 	if err != nil {
-		return fmt.Errorf("failed to find unused port: %v", err)
+		return "", fmt.Errorf("failed to find unused port: %v", err)
 	}
 	fmt.Printf("Found unused port: %d\n", port)
 
@@ -36,7 +34,7 @@ func createCTFdContainer(containerPrefix string) error {
 	containerName := containerPrefix
 
 	// Prepare docker run command
-	dockerCmd := exec.Command("docker", "run",
+	dockerCmd := exec.Command("sudo", "docker", "run",
 		"--detach",
 		"--name", containerName,
 		"-p", fmt.Sprintf("%d:8000", port),
@@ -48,11 +46,14 @@ func createCTFdContainer(containerPrefix string) error {
 	// Run the docker command
 	output, err := dockerCmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("failed to create container: %v\nOutput: %s", err, string(output))
+		return "",fmt.Errorf("failed to create container: %v\nOutput: %s", err, string(output))
 	}
 
 	fmt.Printf("CTFd container '%s' started on port %d\n", containerName, port)
 	fmt.Printf("Access the platform at: http://localhost:%d\n", port)
+	url := fmt.Sprintf("http://localhost:%d", port)
 
-	return nil
+	return url, nil
 }
+
+

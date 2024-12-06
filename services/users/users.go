@@ -119,7 +119,6 @@ func GetUserHandler(ctx *gofr.Context) (interface{}, error) {
 	return user, nil
 }
 
-// DeleteUserHandler handles the endpoint to delete a user by email
 func DeleteUserHandler(ctx *gofr.Context) (interface{}, error) {
 	email := ctx.PathParam("email")
 
